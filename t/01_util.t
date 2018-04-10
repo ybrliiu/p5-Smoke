@@ -24,7 +24,7 @@ filename : hogehoge.pl
 @INC : $VAR1 = [
           '/home/leiu/perl5/devlopment/Smoke',
           '/home/leiu/perl5/devlopment/Smoke/templates',
-          'lib/Smoke/resources/templates'
+          'lib/Smoke/../../share/templates'
         ];
 
  at t/01_util.t line 20.
