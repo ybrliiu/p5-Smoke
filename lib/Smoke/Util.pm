@@ -14,7 +14,7 @@ package Smoke::Util {
     my ($template, $err) = do {
       # @INCの中身は cwd/templates, Smoke/resources/templates
       my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
-      local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/../../share/templates");
+      local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/resources/templates");
       my $template = do $template_file;
       my $error_template = << "EOS";
 [system error]
