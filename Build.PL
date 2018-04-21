@@ -1,7 +1,7 @@
 use 5.008_001;
 use strict;
 use Module::Build::Tiny 0.035;
-use ExtUtils::Instal qw( pm_to_blib );
+use ExtUtils::Install qw( pm_to_blib );
 
 Build_PL();
 {
