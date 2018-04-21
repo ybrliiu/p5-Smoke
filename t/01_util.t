@@ -17,18 +17,10 @@ is $template->({ message => 'HELLO' }), << 'EOS';
   </body>
 </html>
 EOS
-dies_ok { take_in 'hogehoge.pl' };
-is $@, q{[system error]
-reason : No such file or directory
-filename : hogehoge.pl
-@INC : $VAR1 = [
-          '/home/leiu/perl5/devlopment/Smoke',
-          '/home/leiu/perl5/devlopment/Smoke/templates',
-          'lib/Smoke/resources/templates'
-        ];
 
- at t/01_util.t line 20.
-};
+dies_ok { take_in 'hogehoge.pl' };
+ok $@->isa('Smoke::Template::FindException');
+is $@->inc->@*, 3;
 
 lives_ok { validate_values { a => 10, b => 20 }, [qw( a  b )] };
 dies_ok { validate_values {}, [qw( a b )] };

@@ -1,36 +1,41 @@
 package Smoke::Util {
 
   use Smoke;
-  use Exporter 'import';
-  our @EXPORT_OK = qw( take_in validate_values );
-  our %EXPORT_TAGS = (all => \@EXPORT_OK);
+  use Try::Tiny;
+  use Smoke::Template::FindException;
+  use Smoke::Template::ParseException;
+
   use Carp ();
   use Cwd ();
   use File::Basename ();
 
+  use Exporter 'import';
+  our @EXPORT_OK = qw( take_in validate_values );
+  our %EXPORT_TAGS = (all => \@EXPORT_OK);
+
   sub take_in($template_file, $paths = []) {
-    my $file = (caller)[1];
-  
-    my ($template, $err) = do {
-      # @INCの中身は cwd/templates, Smoke/resources/templates
-      my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
-      local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/resources/templates");
-      my $template = do $template_file;
-      my $error_template = << "EOS";
-[system error]
-reason : $!
-filename : $template_file
-\@INC : @{[ Data::Dumper::Dumper \@INC ]}
-EOS
-      ($template, $error_template);
+
+    # @INCの中身は cwd/templates, Smoke/resources/templates
+    my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
+    local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/resources/templates");
+
+    my $template = try {
+      do $template_file;
+    } catch {
+      Smoke::Template::ParseException->throw($_);
     };
-  
-    Carp::croak $@ if $@;
-    Carp::croak $err unless defined $template;
-    unless (ref $template eq 'CODE') {
-      Carp::croak "$template_file does not return CodeRef.";
+
+    unless (defined $template) {
+      Smoke::Template::FindException->throw(
+        inc     => \@INC,
+        message => $!,
+      );
     }
-  
+
+    unless (ref $template eq 'CODE') {
+      Smoke::Template::ParseException->throw("template_file does not return CodeRef.");
+    }
+
     $template;
   }
 

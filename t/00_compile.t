@@ -1,15 +1,8 @@
 use Smoke;
 use Test::More;
+use Test::LoadAllModules;
 
-use_ok $_ for qw(
-  Smoke
-  Smoke::App
-  Smoke::Controller
-  Smoke::Util
-  Smoke::Session
-  Smoke::Router
-  Smoke::Router::Root
-);
+all_uses_ok(search_path => 'Smoke');
 
 done_testing;
 
