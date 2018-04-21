@@ -21,6 +21,7 @@ EOS
 dies_ok { take_in 'hogehoge.pl' };
 ok $@->isa('Smoke::Template::FindException');
 is $@->inc->@*, 3;
+diag explain $@;
 
 lives_ok { validate_values { a => 10, b => 20 }, [qw( a  b )] };
 dies_ok { validate_values {}, [qw( a b )] };

@@ -27,8 +27,9 @@ package Smoke::Util {
 
     unless (defined $template) {
       Smoke::Template::FindException->throw(
-        inc     => \@INC,
-        message => $!,
+        inc           => \@INC,
+        message       => $!,
+        template_file => $template_file,
       );
     }
 

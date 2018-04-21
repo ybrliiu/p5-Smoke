@@ -5,6 +5,12 @@ package Smoke::Template::FindException {
   use Data::Dumper ();
   extends 'Smoke::Exception';
 
+  has 'template_file' => (
+    is       => 'ro',
+    isa      => 'Str',
+    required => 1,
+  );
+
   has 'inc' => (
     is       => 'ro',
     isa      => 'ArrayRef',
