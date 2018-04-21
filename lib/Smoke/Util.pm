@@ -17,7 +17,7 @@ package Smoke::Util {
 
     # @INCの中身は cwd/templates, Smoke/resources/templates
     my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
-    local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/resources/templates");
+    local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/../../share/templates");
 
     my $template = try {
       do $template_file;
