@@ -8,6 +8,7 @@ package Smoke::Util {
   use Carp ();
   use Cwd ();
   use File::Basename ();
+  use File::ShareDir qw( dist_dir );
 
   use Exporter 'import';
   our @EXPORT_OK = qw( take_in validate_values );
@@ -16,8 +17,16 @@ package Smoke::Util {
   sub take_in($template_file, $paths = []) {
 
     # @INCの中身は cwd/templates, Smoke/resources/templates
-    my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
-    local @INC = (@$paths, $cwd, "$cwd/templates", "$dirname/../../share/templates");
+    my $cwd = Cwd::getcwd;
+    my $dirname = File::Basename::dirname(__FILE__);
+    my $share_dir = try {
+      # installed
+      dist_dir('Smoke') . '/templates';
+    } catch {
+      # develop
+      "$dirname/../../share/templates";
+    };
+    local @INC = (@$paths, $cwd, "$cwd/templates", $share_dir);
 
     my $template = try {
       do $template_file;
