@@ -17,7 +17,8 @@ package Smoke::Util {
   sub take_in($template_file, $paths = []) {
 
     # @INCの中身は cwd/templates, Smoke/resources/templates
-    my ($cwd, $dirname) = (Cwd::getcwd, File::Basename::dirname(__FILE__));
+    my $cwd = Cwd::getcwd;
+    my $dirname = File::Basename::dirname(__FILE__);
     my $share_dir = try {
       # installed
       dist_dir('Smoke') . '/templates';
