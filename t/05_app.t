@@ -1,6 +1,11 @@
 use Smoke;
-use Test::More;
-use Test::Exception;
+use HTTP::Request::Common;
+use Plack::Test;
+use Test2::Bundle::More;
+use Test2::Plugin::UTF8;
+use Encode qw( decode_utf8 );
+
+sub trim { my $s = shift; $s =~ s{^\n|\n$}{}gr; }
 
 package Controller {
 
@@ -32,18 +37,20 @@ package App {
 
 }
 
-=head1
-my $app = App->new;
-use Plack::Runner;
-my $runner = Plack::Runner->new;
-$runner->run($app->run);
-use LWP::UserAgent;
-my $ua = LWP::UserAgent->new;
-my $res = $ua->get('http://127.0.0.1:5000');
-if ( $res->is_success ) {
-  diag $res->cotent;
-}
-=cut
+my $app    = App->new;
+my $tester = Plack::Test->create($app->run);
+my $res    = $tester->request(GET '/');
+is trim(decode_utf8 $res->content), trim(q{
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Smoke - error</title>
+  </head>
+  <body>
+    <span style="color:red"><strong>『おはよーーー』</strong></span>
+  </body>
+</html>
+});
 
 ok 1;
 

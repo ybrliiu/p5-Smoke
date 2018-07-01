@@ -6,9 +6,9 @@ package Smoke::Controller {
   use Plack::Request;
   use Plack::Response;
   use Smoke::Session;
+  use Encode qw( encode_utf8 );
   use Scalish qw( option );
   use Smoke::Util qw( take_in );
-  use Encode qw( encode_utf8 );
 
   use constant {
     # success
@@ -76,14 +76,14 @@ package Smoke::Controller {
     $res->finalize;
   }
 
+  sub render_error($self, $message) {
+    $self->render('error.pl', {message => $message});
+  }
+
   sub hook_before_render {}
 
   sub param($self, $key) {
     option( $self->req->param($key) );
-  }
-
-  sub render_error($self, $message) {
-    $self->render('error.pl', {message => $message});
   }
 
   sub redirect_to($self, $path) {
