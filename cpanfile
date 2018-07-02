@@ -6,7 +6,12 @@ requires 'Exception::Tiny', '0.2.1';
 requires 'File::ShareDir', '1.104';
 requires 'Scalish';
 
-on 'test' => sub {
-    requires 'Test::More', '0.98';
+on test => sub {
+  requires 'HTTP::Request::Common';
+  requires 'Plack::Test';
+  requires 'Test2::Bundle::More';
+  requires 'Test2::Plugin::UTF8';
+  requires 'Test::Exception';
+  requires 'Test::LoadAllModules';
+  requires 'Test::More';
 };
-
