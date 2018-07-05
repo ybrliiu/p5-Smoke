@@ -2,13 +2,14 @@ package Smoke::Controller {
 
   use Mouse;
   use Smoke;
+
+  use Encode qw( encode_utf8 );
+  use Scalish qw( option );
   use HTTP::Headers;
   use Plack::Request;
   use Plack::Response;
   use Smoke::Session;
-  use Encode qw( encode_utf8 );
-  use Scalish qw( option );
-  use Smoke::Util qw( take_in );
+  use Smoke::Renderer;
 
   use constant {
     # success
@@ -29,13 +30,13 @@ package Smoke::Controller {
     INTERNAL_SERVER_ERROR => 500,
   };
 
-  has 'env' => (
+  has env => (
     is       => 'ro',
     isa      => 'HashRef',
     required => 1,
   );
 
-  has 'req' => (
+  has req => (
     is      => 'ro',
     isa     => 'Plack::Request',
     lazy    => 1,
@@ -43,14 +44,22 @@ package Smoke::Controller {
     builder => '_build_req',
   );
 
+  has renderer => (
+    is      => 'ro',
+    does    => 'Smoke::RendererRole',
+    lazy    => 1,
+    builder => '_build_renderer',
+  );
+
   sub _build_req($self) {
     Plack::Request->new($self->env);
   }
 
-  sub render($self, $template_file, $args = {}) {
+  sub _build_renderer($self) {
+    Smoke::Renderer->new;
+  }
 
-    $args->{CSS_FILES} //= [];
-    $args->{JS_FILES}  //= [];
+  sub render($self, $template_file, $args = {}) {
 
     $self->hook_before_render($args);
 
@@ -61,23 +70,23 @@ package Smoke::Controller {
       Content_Language => 'ja',
     );
 
-    my $template = take_in $template_file;
-    my $body = encode_utf8 eval { $template->($args) };
-    my $res = do {
-      if (my $e = $@) {
-        my $error = take_in "error.pl";
-        $args->{message} = $e;
-        my $body = encode_utf8 $error->($args);
-        Plack::Response->new(INTERNAL_SERVER_ERROR, $header, $body);
-      } else {
-        Plack::Response->new(OK, $header, $body);
-      }
-    };
+    my $render_result = $self->renderer->render_file($template_file, $args);
+    my $res = $render_result->match(
+      Right => sub ($template) {
+        Plack::Response->new(INTERNAL_SERVER_ERROR, $header, encode_utf8 $template);
+      },
+      Left => sub ($error) {
+        warn $error->description;
+        $args->{message} = $error->description;
+        my $template = $self->renderer->render_file('error.pl', $args)->get;
+        Plack::Response->new(OK, $header, encode_utf8 $template);
+      },
+    );
     $res->finalize;
   }
 
   sub render_error($self, $message) {
-    $self->render('error.pl', {message => $message});
+    $self->render('error.pl', +{ message => $message });
   }
 
   sub hook_before_render {}

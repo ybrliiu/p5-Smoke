@@ -4,7 +4,7 @@ package Smoke::Renderer::FindTemplateError {
   use Smoke;
   use Data::Dumper ();
 
-  extends qw( Smoke::Error );
+  extends qw( Smoke::Renderer::Error );
 
   has file_name => (
     is       => 'ro',
