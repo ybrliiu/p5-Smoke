@@ -18,8 +18,8 @@ like trim($error->description), trim(q{
 cause : testing
 
 stack_trace : 
-testing at t/100_modules/Smoke/error.t line 13.
-	eval {...} called at t/100_modules/Smoke/error.t line 13
+testing at t/100_modules/smoke/error.t line 13.
+	eval {...} called at t/100_modules/smoke/error.t line 13
 });
 
 done_testing;

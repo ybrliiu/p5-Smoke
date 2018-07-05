@@ -1,8 +1,8 @@
 use Smoke;
-use HTTP::Request::Common;
-use Plack::Test;
-use Test2::Bundle::More;
+use Test2::V0 -no_pragmas => 1;
 use Test2::Plugin::UTF8;
+use Plack::Test;
+use HTTP::Request::Common;
 use Encode qw( decode_utf8 );
 
 sub trim { my $s = shift; $s =~ s{^\n|\n$}{}gr; }
