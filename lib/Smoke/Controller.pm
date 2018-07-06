@@ -5,6 +5,7 @@ package Smoke::Controller {
 
   use Encode qw( encode_utf8 );
   use Scalish qw( option );
+  use JSON::XS qw( encode_json );
   use HTTP::Headers;
   use Plack::Request;
   use Plack::Response;
@@ -59,10 +60,11 @@ package Smoke::Controller {
     Smoke::Renderer->new;
   }
 
+  sub create_response($self, $params) {
+    Plack::Response->new(@$params);
+  }
+
   sub render($self, $template_file, $args = {}) {
-
-    $self->hook_before_render($args);
-
     my $header = HTTP::Headers->new(
       Pragma           => 'no-cache',
       Content_Type     => 'text/html; charset=UTF-8',
@@ -71,17 +73,18 @@ package Smoke::Controller {
     );
 
     my $render_result = $self->renderer->render_file($template_file, $args);
-    my $res = $render_result->match(
+    my $res_params    = $render_result->match(
       Right => sub ($template) {
-        Plack::Response->new(INTERNAL_SERVER_ERROR, $header, encode_utf8 $template);
+        [INTERNAL_SERVER_ERROR, $header, encode_utf8 $template];
       },
       Left => sub ($error) {
         warn $error->description;
         $args->{message} = $error->description;
         my $template = $self->renderer->render_file('error.pl', $args)->get;
-        Plack::Response->new(OK, $header, encode_utf8 $template);
+        [OK, $header, encode_utf8 $template];
       },
     );
+    my $res = $self->create_response($res_params);
     $res->finalize;
   }
 
@@ -89,7 +92,15 @@ package Smoke::Controller {
     $self->render('error.pl', +{ message => $message });
   }
 
-  sub hook_before_render {}
+  sub render_json($self, $hash) {
+    my $header = HTTP::Headers->new(
+      Pragma           => 'no-cache',
+      Content_Type     => 'application/json; charset=UTF-8',
+      Cache_Control    => 'no-cache',
+      Content_Language => 'ja',
+    );
+    $self->create_response([OK, $header, encode_json $hash])->finalize;
+  }
 
   sub param($self, $key) {
     option( $self->req->param($key) );

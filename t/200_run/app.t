@@ -1,6 +1,6 @@
 use Smoke;
 use Test2::V0 -no_pragmas => 1;
-use Test2::Plugin::UTF8;
+# use Test2::Plugin::UTF8;
 use Plack::Test;
 use HTTP::Request::Common;
 use Encode qw( decode_utf8 );
@@ -17,6 +17,11 @@ package Controller {
     $self->render_error('おはよーーー');
   }
 
+  sub json($self) {
+    my $hash = +{ name => '四条桃花' };
+    $self->render_json($hash);
+  }
+
   __PACKAGE__->meta->make_immutable;
 
 }
@@ -31,6 +36,7 @@ package App {
     my $router = $self->router;
     my $root = $router->root(path => '', controller => 'Controller');
     $root->any('/');
+    $root->any('/json');
   }
 
   __PACKAGE__->meta->make_immutable;
@@ -52,6 +58,9 @@ is trim(decode_utf8 $res->content), trim(q{
 </html>
 });
 
-ok 1;
+my $res2 = $tester->request(GET '/json');
+is trim(decode_utf8 $res2->content), trim(q{
+{"name":"四条桃花"}
+});
 
 done_testing;
