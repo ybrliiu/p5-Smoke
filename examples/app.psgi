@@ -37,3 +37,5 @@ package App {
 use Smoke;
 my $app = App->new;
 $app->run;
+
+# run plackup -Ilib examples/app.psgi
